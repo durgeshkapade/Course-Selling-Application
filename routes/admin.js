@@ -112,6 +112,7 @@ adminRouter.post("/signin", async function(req, res) {
 
 
 
+
 adminRouter.post("/course", adminMiddleware ,async function(req, res) {
 
     const adminId = req.userId;
@@ -133,11 +134,49 @@ adminRouter.post("/course", adminMiddleware ,async function(req, res) {
     
 })
 
-adminRouter.put("/course", async function(req, res) {
+adminRouter.put("/course", adminMiddleware , async function(req, res) {
+
+    const adminId = req.userId;
+
+    const { title, description,price,imageUrl ,courseId} = req.body;
+
+    const course = await courseModel.updateOne({
+        _id : courseId ,
+        creatorId : adminId
+    },{
+        title : title,
+        description : description,
+        price : price,
+        imageUrl : imageUrl,
+    })
+
+    
+    if(course.modifiedCount == 0 ){
+        return res.status(200).json({
+            message : "You are not creator of that course , so can't update it"
+        })
+    }
+
+    return res.status(200).json({
+        message : "Course Updated Successfully",
+        course,
+        courseId : course._id
+    })
     
 })
 
-adminRouter.get("/course/bulk",async function(req, res) {
+adminRouter.get("/course/bulk",adminMiddleware , async function(req, res) {
+
+     const adminId = req.userId;
+
+    const courses = await courseModel.find({
+        creatorId : adminId
+    })
+
+    return res.status(200).json({
+        message : "This is all Courses",
+        courses
+    })
     
 })
 

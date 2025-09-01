@@ -1,11 +1,11 @@
 const jwt  = require('jsonwebtoken');
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 
 function userMiddleware(req , res, next){
 
     const token = req.headers.token;
 
-    const decode  = jwt.verify(token , JWT_USER_SECRET);
+    const decode  = jwt.verify(token , process.env.JWT_USER_SECRET);
 
     if(decode){
 

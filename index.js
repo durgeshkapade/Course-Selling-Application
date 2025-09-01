@@ -4,15 +4,13 @@ const { courseRouter } = require('./routes/course');
 const { userRouter } = require('./routes/user');
 const {adminRouter} = require('./routes/admin')
 const mongoose = require('mongoose');
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 
 const app = express();
 
 // middlewares
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
-
-
 
 
 

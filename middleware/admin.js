@@ -1,19 +1,19 @@
 const jwt  = require('jsonwebtoken');
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 
 function adminMiddleware(req , res, next){
 
     const token = req.headers.token;
 
-    const decode  = jwt.verify(token , JWT_ADMIN_SECRET);
+    const decode  = jwt.verify(token , process.env.JWT_ADMIN_SECRET);
 
     if(decode){
 
         req.userId = decode.id;
 
-        console.log(decode);
-        console.log(decode.id);
-        console.log(req.userId);
+        // console.log(decode);
+        // console.log(decode.id);
+        // console.log(req.userId);
         
         next();
 

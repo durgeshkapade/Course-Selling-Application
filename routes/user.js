@@ -1,12 +1,15 @@
 const {Router}  = require('express');
-const {userModel,purchaseModel , courseModel} = require('../db');
 const userRouter = Router();
+const {userModel,purchaseModel , courseModel} = require('../db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-require('dotenv').config();
+const {userMiddleware} = require('../middleware/user')
+require('dotenv').config({ quiet: true });
 
 
-userRouter.post('/signUp',async (req,res)=>{
+
+
+userRouter.post('/signup',async (req,res)=>{
     try{
 
         const { email , password ,firstName ,lastName }= req.body;
@@ -53,7 +56,7 @@ userRouter.post('/signUp',async (req,res)=>{
 })
 
 
-userRouter.post('/signIn',async (req,res)=>{
+userRouter.post('/signin',async (req,res)=>{
 
     try{
 
@@ -64,6 +67,8 @@ userRouter.post('/signIn',async (req,res)=>{
                 message : "Please enter All details carefully"
             })
         }
+
+        
 
         let user = await userModel.findOne({email});
 
@@ -81,7 +86,7 @@ userRouter.post('/signIn',async (req,res)=>{
 
         if(await bcrypt.compare(password , user.password)){
 
-            const token = jwt.sign(payload , process.env.JWT_SECRET);
+            const token = jwt.sign(payload , process.env.JWT_USER_SECRET);
 
             user.password = undefined
 
@@ -108,10 +113,54 @@ userRouter.post('/signIn',async (req,res)=>{
     }
 
 })
-  
 
-userRouter.get('/purchases',(req,res)=>{
-    res.send("Hello");
+
+userRouter.get('/purchases',userMiddleware ,  async(req,res)=>{
+
+    try{
+
+        const userId = req.userId;
+
+        const purchases = await  purchaseModel.find({
+            userId
+        })
+
+        // 1 way = Both are , but only diff is here we not use map [ extract ids and then find course form ids array]
+
+        // const ids = [];
+        // for(let i=0;i<purchases.length ; i++){
+        //     ids.push(purchases[i].courseId)
+        // }
+
+        // const courseData = await  courseModel.find({
+        //     _id : { $in : ids}
+        // }) 
+
+        // 2 way
+
+        const courseData = await courseModel.find({
+            _id : { $in : purchases.map(x => x.courseId)}
+        }) 
+
+
+
+        
+
+        return res.status(200).json({
+            message : "All Purchases Course",
+            purchases,
+            courseData
+        })
+
+
+    }catch(err){
+        return res.status(404).json({
+            message : "Internal Server Error"
+        })
+
+    }
+
+
 })
 
 
